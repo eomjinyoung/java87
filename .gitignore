@@ -1,0 +1,5 @@
+#.gitignore
+/.gradle/
+/bin/
+/.settings/
+/build/
