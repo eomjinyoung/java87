@@ -30,7 +30,7 @@ help - Displays a help message.
 ~~~~
 
 ## 그래들 설정 파일 생성
-- build.gradle 
+- project01/build.gradle 
 ~~~~
 apply plugin: "java"
 apply plugin: "eclipse"
@@ -48,4 +48,26 @@ project01
     test
       java
       resources
+~~~~
+
+## 깃허브에 업로드할 대상에서 제외할 것 설정
+- project01/.gitignore
+~~~~
+/.gradle/
+/bin/
+/.settings/
+/build/
+~~~~
+
+## 이클립스 프로젝트 설정 파일 생성
+- 이클립스에서 프로젝트 디렉토리로 인식할 수 있도록 관련 파일을 생성한다.
+~~~~
+> gradle eclipse
+
+~~~~
+
+## 이클립스 웹 프로젝트 설정 파일 생성 
+- project01/build.gradle 파일을 변경
+~~~~
+
 ~~~~
