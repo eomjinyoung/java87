@@ -1,0 +1,5 @@
+//그래들 자바 빌드 도구를 가져온다.
+apply plugin: "java"
+
+//그래들 이클립스 설정 파일을 만들어주는 도구를 가져온한다.
+apply plugin: "eclipse"
