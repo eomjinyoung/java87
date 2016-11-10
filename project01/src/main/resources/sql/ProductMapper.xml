@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ProductMapper">
+ 	
+	<resultMap id="productSelectMap" type="product">
+		<result property="prodNo" 			column="PROD_NO" 					jdbcType="NUMERIC"/>
+		<result property="prodName"		column="PROD_NAME" 				jdbcType="VARCHAR" />
+		<result property="prodDetail" 		column="PROD_DETAIL" 				jdbcType="VARCHAR" />
+		<result property="manuDate" 		column="MANUFACTURE_DAY" 	jdbcType="VARCHAR" />
+		<result property="price" 				column="PRICE" 						jdbcType="NUMERIC" />
+		<result property="fileName" 		column="IMAGE_FILE" 				jdbcType="VARCHAR"  />
+		<result property="regDate" 			column="REG_DATE" 					jdbcType="DATE" />
+	</resultMap>
+	
+	<!-- SQL : INSERT --> <!-- seq_product_prod_no.NEXTVAL --> <!--  #{ssn:VARCHAR} ,  -->
+	<insert 	id="addProduct"		parameterType="product" >
+	 	INSERT
+		INTO PRODUCT( PROD_NO , PROD_NAME , PROD_DETAIL , MANUFACTURE_DAY , PRICE, IMAGE_FILE, REG_DATE) 
+		VALUES	 (seq_product_prod_no.NEXTVAL, #{prodName:VARCHAR} , #{prodDetail} , replace(${manuDate},'-', ''),  #{price:VARCHAR}, #{fileName:VARCHAR}
+							, SYSDATE )
+	 </insert>
+	 
+	 <!-- SQL : SELECT ONE -->
+	 <select 	id="getProduct"	parameterType="string"	resultMap="productSelectMap">
+		SELECT
+		PROD_NO , PROD_NAME , PROD_DETAIL ,IMAGE_FILE , MANUFACTURE_DAY ,  PRICE , REG_DATE 		
+		FROM PRODUCT 
+		WHERE PROD_NO = #{value}
+	 </select>
+	 
+	 <!-- SQL : UPDATE -->
+	 <update	id="updateProduct"	parameterType="product" >
+	   	UPDATE PRODUCT
+	   	<set>
+	   		PROD_NAME 	= #{prodName} ,
+			PROD_DETAIL	= #{prodDetail},
+			MANUFACTURE_DAY 	= #{manuDate} ,
+			PRICE				=	#{price}
+	   	</set>
+	   	WHERE PROD_NO = #{prodNo}
+	 </update>
+	 
+	 <!-- delete -->
+	 <delete id="deleteProduct" parameterType="int">
+	 	delete PRODUCT
+	 	where prod_no = #{value}
+	 </delete>
+	 
+		 
+	<!-- SQL : SELECT LIST -->
+	<select  id="getProductList"  parameterType="search"	resultMap="productSelectMap">
+	  	SELECT *
+	  	FROM (	SELECT inner_table.* , ROWNUM AS row_seq
+	  					FROM		(	SELECT A.PROD_NO, PROD_NAME , PROD_DETAIL , MANUFACTURE_DAY, PRICE, TRAN_STATUS_CODE
+											FROM PRODUCT a, TRANSACTION b
+											<if test="searchCondition != null">
+												<where>
+													<if test="searchCondition == 0 and searchKeyword !='' ">
+										 				PROD_NAME like '%${searchKeyword}%'
+													</if>
+													<if test="searchCondition == 1 and searchKeyword !='' ">
+										 				price like '%${searchKeyword}%'
+													</if>
+														and a.PROD_NO = b.PROD_NO(+)
+												</where>
+											</if>
+											<if test="searchCondition == null">
+												where a.PROD_NO = b.PROD_NO(+)
+											</if>
+											 ORDER BY a.PROD_NO ) inner_table
+						WHERE ROWNUM &lt;= #{endRowNum} )
+		WHERE row_seq BETWEEN #{startRowNum} AND #{endRowNum} 
+	 </select>
+	 	<!--  위 두번째 subQuery 의  
+	 			WHERE ROWNUM &lt;= #{endRowNum} ) 는
+	 			WHERE ROWNUM <= #{endRowNum} ) 의미이며..
+	 			< 는 keyword 로 &lt; 를	사용.
+	 			
+	 			<![CDATA[  ~~~  ]]> 를 이용하여 아래와 같이 사용  할 수 있다.
+	 			CDATA ==> Character Data 의 의미 Java 에서 \n 같은 특수문자 처리  
+
+				WHERE ROWNUM <![CDATA[ <=]]> #{endRowNum} )
+		-->
+	
+	<!-- SQL : SELECT ROW Count -->	 
+	 <select  id="getTotalCount"  parameterType="search"	 resultType="int">
+	  	SELECT COUNT(*)
+	  	FROM(	SELECT PROD_NAME , PROD_DETAIL , MANUFACTURE_DAY, PRICE, TRAN_STATUS_CODE
+						FROM PRODUCT a, TRANSACTION b
+						<if test="searchCondition != null">
+							<where>
+								<if test="searchCondition == 0 and searchKeyword !='' ">
+						 			PROD_NAME like '${searchKeyword}%'
+								</if>
+								<if test="searchCondition == 1 and searchKeyword !='' ">
+						 			price like '${searchKeyword}%'
+								</if>
+									and a.PROD_NO = b.PROD_NO(+)
+							</where>
+						</if>
+					<if test="searchCondition == null">
+						where a.PROD_NO = b.PROD_NO(+)
+					</if>
+				) countTable						
+	 </select>
+	 
+</mapper>
